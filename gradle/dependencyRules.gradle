@@ -1,0 +1,39 @@
+configurations.configureEach { Configuration configuration ->
+  if (!configuration.canBeResolved) {
+    return
+  }
+
+  if (configuration.name == "codenarc") {
+    resolutionStrategy {
+      eachDependency {
+        if (requested.group == "org.codehaus.groovy") {
+          useVersion commonVersions.groovy
+        }
+      }
+    }
+  }
+
+  if (
+  configuration.name != "codenarc" && !configuration.name.startsWith("test")
+    && !(project.name in [
+    "perf", "ratpack-groovy", "ratpack-groovy-test",
+    "ratpack-remote", "ratpack-remote-test", "ratpack-site",
+    "ratpack-test-internal"
+  ])
+
+  ) {
+    incoming.afterResolve { incoming ->
+      incoming.resolutionResult.allDependencies {
+        if (it instanceof ResolvedDependencyResult) {
+          if (
+          it.selected.moduleVersion.name == "groovy" &&
+            it.selected.moduleVersion.group == "org.codehaus.groovy"
+          ) {
+            throw new InvalidUserDataException("groovy in dependency graph of $configuration.name of project $project.name")
+          }
+        }
+      }
+    }
+  }
+
+}

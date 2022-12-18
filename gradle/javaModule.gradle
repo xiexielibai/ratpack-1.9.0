@@ -1,0 +1,124 @@
+/*
+ * Copyright 2013 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+apply plugin: "java"
+apply plugin: "groovy"
+apply plugin: "jacoco"
+apply from: "$rootDir/gradle/checkstyle.gradle"
+apply from: "$rootDir/gradle/codenarc.gradle"
+
+dependencies {
+  testCompile commonDependencies.groovy
+  testCompile commonDependencies.spock
+  testCompile project(":ratpack-test-internal")
+}
+
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"
+
+tasks.withType(AbstractCompile).configureEach {
+  options.incremental = true
+  options.compilerArgs << "-Werror" << "-Xlint:all" << "-Xlint:-options" << "-Xlint:-serial"
+  options.compilerArgs << "-Xlint:-classfile" // Needed due to https://issues.jboss.org/browse/JASSIST-245
+}
+
+if (project.path != ":ratpack-benchmark") {
+  tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs.add("-proc:none")
+  }
+  tasks.withType(GroovyCompile).configureEach {
+    groovyOptions.forkOptions.memoryMaximumSize = "256m"
+    options.compilerArgs.add("-proc:none")
+  }
+}
+
+tasks.withType(Javadoc).configureEach {
+  options.encoding = "utf-8"
+  options.docEncoding = "utf-8"
+  options.charSet = "utf-8"
+  exclude "**/internal/**"
+
+  options.addStringOption('Xdoclint:none', '-quiet')
+
+  doFirst {
+    if (project.ext.has("apiLinks")) {
+      options.links(*project.apiLinks)
+    }
+  }
+}
+
+tasks.named("javadoc", Javadoc) {
+  options.links "http://ratpack.io/manual/${version - "-SNAPSHOT"}/api"
+}
+
+tasks.withType(Test).configureEach {
+  systemProperty "io.netty.allocator.type", "unpooled"
+  systemProperty "io.netty.leakDetectionLevel", "paranoid"
+
+  jvmArgs "-Xss320k", "-XX:MaxDirectMemorySize=64m"
+  minHeapSize "256m"
+  maxHeapSize "768m"
+
+  testLogging {
+    exceptionFormat "full"
+  }
+
+  reports {
+    junitXml {
+      outputPerTestCase = true
+    }
+  }
+
+  if (isCloudCi) {
+    systemProperty "cloudCi", "true"
+    testLogging {
+      events "started", "failed"
+    }
+  }
+
+  doFirst {
+
+    // Workaround https://github.com/gradle/gradle/issues/1893
+    // Without this, we get Gradle's logging in our tests when we actually want log4j.
+    // This forces gradle to be last in the classpath, so our logging lib is found first by Slf4j.
+    classpath = files(classpath.files - dependencies.gradleTestKit().files) + dependencies.gradleTestKit().files
+  }
+
+  environment "GRADLE_USER_HOME", gradle.gradleUserHomeDir
+}
+
+jacoco {
+  toolVersion = "0.8.2"
+}
+
+tasks.register("codeQuality") {
+  it.dependsOn tasks.withType(CodeNarc), tasks.withType(Checkstyle)
+}
+
+tasks.named("sanityCheck") {
+  it.dependsOn(tasks.named("codeQuality"))
+}
+
+tasks.named("jacocoTestReport", JacocoReport) {
+  it.additionalSourceDirs.from(files(sourceSets.main.allSource.srcDirs))
+  it.sourceDirectories.from(files(sourceSets.main.allSource.srcDirs))
+  it.classDirectories.from(files(sourceSets.main.output))
+  it.reports {
+    html.enabled = true
+    xml.enabled = true
+    csv.enabled = false
+  }
+}

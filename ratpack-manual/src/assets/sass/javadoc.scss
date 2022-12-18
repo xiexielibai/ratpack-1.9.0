@@ -1,0 +1,158 @@
+/*!
+ * Copyright 2020 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@import "compass";
+@import "palette";
+@import "utilities";
+@import "typography";
+@import "_prism";
+@import "fonts";
+
+body, .title {
+  color:#333333;
+}
+
+body, div.block, .deprecationBlock, button {
+  font-family: $body-font-family;
+}
+
+.title {
+  font-weight: 300;
+  font-size: 32px;
+  margin-top: 0;
+}
+
+a:link, a:visited {
+  text-decoration:none;
+  color: $anchor-font-color;
+}
+
+a[href]:hover, a[href]:focus {
+  text-decoration:none;
+  color:$anchor-font-color-hover;
+}
+
+pre, code, tt, dt code, table tr td dt code {
+  font-family: $code-font-family;
+}
+
+.navList {
+  color: darkgrey;
+}
+
+.bar {
+  background-color:$purple;
+}
+
+.topNav {
+  background-color:$purple;
+}
+
+.bottomNav {
+  background-color:$purple;
+}
+
+.subNav {
+  background-color:#f5f5f5;
+}
+
+.topNav a:hover, .bottomNav a:hover {
+  text-decoration:underline;
+  color:inherit;
+}
+
+.navBarCell1Rev {
+  background-color:$yellow;
+  color:$black;
+  border-radius: 6px;
+  height: 20px;
+}
+
+.indexNav {
+  background-color:#eee;
+}
+
+div.details ul.blockList ul.blockList ul.blockList li.blockList h4, div.details ul.blockList ul.blockList ul.blockListLast li.blockList h4 {
+  background-color:#ddd;
+  border:1px solid #ddd;
+}
+
+ul.blockList ul.blockList ul.blockList li.blockList h3 {
+  background-color:#ddd;
+  border:1px solid #ddd;
+}
+
+.constantsSummary caption a:link, .constantsSummary caption a:visited,
+.useSummary caption a:link, .useSummary caption a:visited {
+  color:$anchor-font-color;
+}
+
+.overviewSummary caption span, .memberSummary caption span, .typeSummary caption span,
+.useSummary caption span, .constantsSummary caption span, .deprecatedSummary caption span,
+.requiresSummary caption span, .packagesSummary caption span, .providesSummary caption span,
+.usesSummary caption span,
+.memberSummary caption span.activeTableTab span, .packagesSummary caption span.activeTableTab span,
+.overviewSummary caption span.activeTableTab span, .typeSummary caption span.activeTableTab span,
+.overviewSummary .tabEnd, .memberSummary .tabEnd, .typeSummary .tabEnd,
+.useSummary .tabEnd, .constantsSummary .tabEnd, .deprecatedSummary .tabEnd,
+.requiresSummary .tabEnd, .packagesSummary .tabEnd, .providesSummary .tabEnd, .usesSummary .tabEnd,
+.memberSummary .activeTableTab .tabEnd, .packagesSummary .activeTableTab .tabEnd,
+.overviewSummary .activeTableTab .tabEnd, .typeSummary .activeTableTab .tabEnd {
+  background-color:$yellow;
+  color: $black;
+}
+
+.memberSummary caption span.tableTab span, .packagesSummary caption span.tableTab span,
+.overviewSummary caption span.tableTab span, .typeSummary caption span.tableTab span,
+.memberSummary .tableTab .tabEnd, .packagesSummary .tableTab .tabEnd,
+.overviewSummary .tableTab .tabEnd, .typeSummary .tableTab .tabEnd,
+.ui-autocomplete-category {
+  background-color:$purple;
+  color: $white;
+}
+
+th.colFirst, th.colSecond, th.colLast, th.colConstructorName, th.colDeprecatedItemName, .constantsSummary th,
+.packagesSummary th {
+  background:#eee;
+}
+
+.tableSubHeadingColor {
+  background-color:#eee;
+}
+
+.altColor, .altColor th {
+  background-color:#fff;
+}
+
+.rowColor, .rowColor th {
+  background-color:#eee;
+}
+
+.block {
+  margin:0px 10px 5px 0px;
+}
+
+th.colFirst, th.colSecond, th.colLast, th.colConstructorName, th.colDeprecatedItemName, .constantsSummary th,
+.packagesSummary th, .overviewSummary td, .memberSummary td, .typeSummary td,
+.useSummary td, .constantsSummary td, .deprecatedSummary td,
+.requiresSummary td, .packagesSummary td, .providesSummary td, .usesSummary td {
+  padding-left:7px;
+}
+
+pre[class*='language-'] code {
+  padding-top: 0;
+  line-height: 1.6;
+}

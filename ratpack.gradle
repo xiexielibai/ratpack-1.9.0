@@ -1,0 +1,102 @@
+allprojects {
+  group = "io.ratpack"
+  version = "1.9.0"
+}
+
+ext {
+  isSnapshot = version.endsWith("SNAPSHOT")
+  isTravis = System.getenv("TRAVIS") != null
+  isDrone = System.getenv("DRONE") != null
+  isCodeship = System.getenv("CI_NAME") == "codeship"
+  isSnapCi = System.getenv("SNAP_CI") != null
+  isAppveyor = System.getenv("APPVEYOR") != null
+  isHeroku = System.getenv("HEROKU") != null
+  isSemaphore = System.getenv("SEMAPHORE") != null
+  isCircleCI = System.getenv("CIRCLECI") != null
+  isCloudCi = isTravis || isDrone || isCodeship || isSnapCi || isAppveyor || isSemaphore || isCircleCI
+  isCi = isCloudCi
+
+  publishedModules = [
+    "ratpack-base",
+    "ratpack-consul",
+    "ratpack-core",
+    "ratpack-dropwizard-metrics",
+    "ratpack-exec",
+    "ratpack-gradle",
+    "ratpack-groovy",
+    "ratpack-groovy-test",
+    "ratpack-gson",
+    "ratpack-guice",
+    "ratpack-h2",
+    "ratpack-handlebars",
+    "ratpack-hikari",
+    "ratpack-hystrix",
+    "ratpack-jdbc-tx",
+    "ratpack-newrelic",
+    "ratpack-pac4j",
+    "ratpack-reactor",
+    "ratpack-remote",
+    "ratpack-remote-test",
+    "ratpack-retrofit2",
+    "ratpack-rocker",
+    "ratpack-rx", "ratpack-rx2",
+    "ratpack-session",
+    "ratpack-session-redis",
+    "ratpack-session-serialization-kryo",
+    "ratpack-spring-boot",
+    "ratpack-spring-boot-starter",
+    "ratpack-test",
+    "ratpack-thymeleaf",
+    "ratpack-thymeleaf3",
+  ].collect { project(it) }
+
+  nonLibraryPublishedModules = [
+    "ratpack-spring-boot-starter", "ratpack-manual"
+
+  ].collect { project(it) }
+
+  apiModules = publishedModules.findAll { !(it.name in ["ratpack-manual", "ratpack-gradle", "ratpack-spring-boot-starter", "ratpack-thymeleaf3"]) }
+}
+
+def jvmEncoding = java.nio.charset.Charset.defaultCharset().name()
+if (jvmEncoding != "UTF-8") {
+  throw new IllegalStateException("Build environment must be UTF-8 (it is: $jvmEncoding) - add '-Dfile.encoding=UTF-8' to the GRADLE_OPTS environment variable ")
+}
+
+if (!JavaVersion.current().java11Compatible) {
+  throw new IllegalStateException("Must be built with Java 11 or higher")
+}
+
+gradle.beforeProject {
+  it.with {
+
+    apply plugin: "base"
+    apply from: "$rootDir/gradle/dependencyRules.gradle"
+    apply plugin: "com.github.ben-manes.versions"
+
+    repositories {
+      mavenCentral()
+      maven { url 'https://oss.jfrog.org/artifactory/repo' }
+    }
+
+    configurations {
+      published
+    }
+
+    tasks.withType(JavaExec) {
+      maxHeapSize = "1g"
+    }
+
+    tasks.register("sanityCheck")
+
+    apply from: "$rootDir/gradle/ratpackLocal.gradle"
+    if (project in publishedModules && !(project in nonLibraryPublishedModules)) {
+      apply from: "$rootDir/gradle/publish-library.gradle"
+    }
+  }
+}
+
+apply from: "gradle/idea.gradle"
+apply from: "gradle/publish-root.gradle"
+apply from: "gradle/dependencies.gradle"
+apply from: "gradle/coveralls.gradle"
